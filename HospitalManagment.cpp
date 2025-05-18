@@ -7,13 +7,15 @@
 #include <cstdlib>
 #include <vector>
 #include <map>
+#include <regex> //for date input validation
+#include <limits>
+#include <ctime>
 
 using namespace std;
 
-const int MAX_RECORDS = 100;
 
 struct Staff {
-    int id;
+    int id{};
     string name;
     string department;
     string shift;
@@ -22,7 +24,7 @@ struct Staff {
 struct Equipment {
     string name;
     string department;
-    int quantity;
+    int quantity{};
 };
 
 struct LabResult {
@@ -35,7 +37,7 @@ struct LabResult {
 
 struct Medicine {
     string name;
-    int quantity;
+    int quantity{};
 };
 
 struct appointment {
@@ -46,16 +48,24 @@ struct appointment {
 struct patient {
     string id;
     string name;
-    int age;
+    int age{};
     appointment apt;
     // add more fields as needed
 };
 
 struct billing {
     string patient_id;
-    double amount;
+    double amount{};
     string status;
     // add more fields as needed
+};
+
+struct Feedback {
+    string user_id;
+    string type;
+    int rating;
+    string comment;
+    string date;
 };
 
 // Placeholder functions
@@ -135,6 +145,7 @@ void staff_menu() {
             case 2: show_staff_by_id(); break;
             case 3: remove_staff(); break;
             case 4: staff_statistics(); break;
+            default: cout << "Invalid Input!";
         }
     } while (ch != 5);
 }
@@ -375,17 +386,17 @@ int main() {
 
     while (true) {
         int choice1;
-        cout << "Welcome to the Hospital Management System" << endl;
+        cout << "\nWelcome to the Hospital Management System" << endl;
         cout << "1. Patient Management" << endl;
         cout << "2. Staff Management" << endl;
-        cout << "3. Billing Management" << endl;
-        cout << "4. Reports and Statistics" << endl;
-        cout << "5. Feedback" << endl;
-        cout << "6. Exit" << endl;
+        cout << "3. Lab and Equipment Management" << endl;
+        cout << "4. Pharmacy Management" << endl;
+        cout << "5. Billing Management" << endl;
+        cout << "6. Reports and Statistics" << endl;
+        cout << "7. Feedback" << endl;
+        cout << "8. Exit" << endl;
         cout << "Please enter your choice: ";
         cin >> choice1;
-        if (switchInputCheck()) continue;
-
         switch (choice1) {
             case 1: {
                 cout << "Patient Management" << endl;
@@ -473,6 +484,7 @@ int main() {
                                 cout << "Enter Appointment Date (YYYY-MM-DD): ";
                                 string date_input;
                                 cin >> date_input;
+                               // ??????
                                 regex date_pattern(R"(\d{4}-\d{2}-\d{2})");
                                 while (!regex_match(date_input, date_pattern)) {
                                     cout << "Invalid date format. Please enter the date in YYYY-MM-DD format: ";
@@ -579,49 +591,6 @@ int main() {
                 }
                 break;
             }
-    case 2:
-        cout << "Schedule Appointment" << endl;
-        cout << "Enter Patient ID: ";
-        cin >> patient_id;
-        {
-            bool found = false;
-            for (int i = 0; i < patient_count; i++)
-            {
-                if (patients[i].id == patient_id)
-                {
-                    found = true;
-                    cout << "Enter Appointment Date (YYYY-MM-DD): ";
-                    cin >> patients[i].appointment_date;
-                    cout << "Appointment scheduled successfully!" << endl;
-                    break;
-                }
-            }
-            if (!found)
-            {
-                cout << "Patient not found." << endl;
-            }
-        }
-        break;
-
-    case 3:
-        cout << "Check Appointment Records" << endl;
-        // Placeholder for appointment records checking
-        break;
-
-    case 4:
-        cout << "Electronic Medical Records" << endl;
-        // Placeholder for EMR handling
-        break;
-
-    case 5:
-        cout << "Exiting..." << endl;
-        return 0;
-
-    default:
-        cout << "Invalid choice. Please try again." << endl;
-    }
-    break;
-}
 
 case 2:
     staff_menu();
@@ -814,37 +783,131 @@ case 5:
     }
     break;
 
+
 case 6:
 {
-    cout << "Reports and Analytics" << endl;
+    cout << "\n=== Reports and Statistics ===" << endl;
     int choice5;
-    cout << "1. Patient Statistics" << endl;
-    cout << "2. Staff Performance" << endl;
-    cout << "3. Financial Reports" << endl;
-    cout << "4. Exit" << endl;
-    cout << "Please enter your choice: ";
-    cin >> choice5;
+    do {
+        cout << "\n1. Patient Statistics" << endl;
+        cout << "2. Staff Performance" << endl;
+        cout << "3. Financial Report" << endl;
+        cout << "4. Return to Main Menu" << endl;
+        cout << "Please enter your choice: ";
+        cin >> choice5;
 
-    switch (choice5)
-    {
-    case 1:
-        cout << "Patient Statistics" << endl;
-        // Add code
-        break;
-    case 2:
-        cout << "Staff Performance" << endl;
-        // Add code
-        break;
-    case 3:
-        cout << "Financial Reports" << endl;
-        // Add code
-        break;
-    case 4:
-        cout << "Exiting..." << endl;
-        return 0;
-    default:
-        cout << "Invalid choice. Please try again." << endl;
-    }
+        switch (choice5)
+        {
+        case 1: {
+            // Patient Statistics
+            cout << "\n--- PATIENT STATISTICS ---" << endl;
+            cout << "Total Registered Patients: " << patient_count << endl;
+            
+            // Age distribution
+            cout << "\nAge Distribution:" << endl;
+            int ageGroups[4] = {0}; // 0-18, 19-35, 36-60, 61+
+            for (int i = 0; i < patient_count; i++) {
+                if (patients[i].age <= 18) ageGroups[0]++;
+                else if (patients[i].age <= 35) ageGroups[1]++;
+                else if (patients[i].age <= 60) ageGroups[2]++;
+                else ageGroups[3]++;
+            }
+            
+            cout << "Children (0-18):    " << setw(4) << ageGroups[0] << " patients" << endl;
+            cout << "Adults (19-35):    " << setw(4) << ageGroups[1] << " patients" << endl;
+            cout << "Middle-aged (36-60):" << setw(4) << ageGroups[2] << " patients" << endl;
+            cout << "Seniors (61+):     " << setw(4) << ageGroups[3] << " patients" << endl;
+            
+            // Appointment statistics
+            int withAppointments = 0;
+            for (int i = 0; i < patient_count; i++) {
+                if (!patients[i].apt.appointment_date.empty()) {
+                    withAppointments++;
+                }
+            }
+            cout << "\nPatients with appointments: " << withAppointments << "/" << patient_count 
+                 << " (" << fixed << setprecision(1) 
+                 << (patient_count > 0 ? (withAppointments * 100.0 / patient_count) : 0)
+                 << "%)" << endl;
+            break;
+        }
+        
+        case 2: {
+            // Staff Performance
+            cout << "\n--- STAFF PERFORMANCE ---" << endl;
+            cout << "Total Staff Members: " << staff_list.size() << endl;
+            
+            // Department efficiency (simplified - assumes more staff = more capacity)
+            cout << "\nDepartment Staffing:" << endl;
+            map<string, int> deptCount;
+            for (const auto& s : staff_list) {
+                deptCount[s.department]++;
+            }
+            
+            for (const auto& dept : deptCount) {
+                cout << left << setw(15) << dept.first << ": " 
+                     << setw(3) << dept.second << " staff ("
+                     << fixed << setprecision(1) 
+                     << (staff_list.size() > 0 ? (dept.second * 100.0 / staff_list.size()) : 0)
+                     << "%)" << endl;
+            }
+            
+            // Lab technician performance (if available)
+            if (!lab_results.empty()) {
+                cout << "\nLab Technician Performance:" << endl;
+                map<string, int> techTests;
+                for (const auto& lr : lab_results) {
+                    techTests[lr.technician]++;
+                }
+                
+                for (const auto& tech : techTests) {
+                    cout << left << setw(20) << tech.first << ": " 
+                         << tech.second << " tests conducted" << endl;
+                }
+            }
+            break;
+        }
+        
+        case 3: {
+            // Financial Report
+            cout << "\n--- FINANCIAL REPORT ---" << endl;
+            
+            double totalBilled = 0.0;
+            double totalPaid = 0.0;
+            int unpaidCount = 0;
+            
+            for (int i = 0; i < billing_count; i++) {
+                totalBilled += billings[i].amount;
+                if (billings[i].status.find("Paid") != string::npos) {
+                    totalPaid += billings[i].amount;
+                } else {
+                    unpaidCount++;
+                }
+            }
+            
+            cout << fixed << setprecision(2);
+            cout << "Total Revenue:     $" << setw(10) << totalBilled << endl;
+            cout << "Amount Collected:  $" << setw(10) << totalPaid << endl;
+            cout << "Outstanding:       $" << setw(10) << (totalBilled - totalPaid) << endl;
+            cout << "Unpaid Bills:      " << setw(10) << unpaidCount << endl;
+            
+            // Payment types
+            if (billing_count > 0) {
+                cout << "\nPayment Distribution:" << endl;
+                cout << "Collected: " << (totalPaid/totalBilled)*100 << "%" << endl;
+                cout << "Outstanding: " << ((totalBilled-totalPaid)/totalBilled)*100 << "%" << endl;
+            }
+            break;
+        }
+        
+        case 4:
+            cout << "Returning to Main Menu..." << endl;
+            break;
+            
+        default:
+            cout << "Invalid choice. Please try again." << endl;
+        }
+    } while (choice5 != 4);
     break;
 }
 
@@ -852,42 +915,141 @@ case 7:
 {
     cout << "Feedback" << endl;
     int choice6;
-    cout << "1. Patient Feedback on Staff Handling" << endl;
-    cout << "2. Patient Feedback on Facilities" << endl;
-    cout << "3. Staff Feedback on Management" << endl;
-    cout << "4. Exit" << endl;
+    cout << "1. Patient Feedback" << endl;
+    cout << "2. Staff Feedback on Management" << endl;
+    cout << "3. Exit" << endl;
+    cout << "Please enter your choice: ";
+    cin >> choice6;
+
+switch (choice6)
+{
+case 7:
+{
+    cout << "Feedback" << endl;
+    int choice6;
+    cout << "1. Patient Feedback" << endl;
+    cout << "2. Staff Feedback on Management" << endl;
+    cout << "3. Exit" << endl;
     cout << "Please enter your choice: ";
     cin >> choice6;
 
     switch (choice6)
     {
-    case 1:
-        cout << "Patient Feedback on Staff Handling" << endl;
-        // Add feedback handling
+    case 1: {
+        cout << "Patient Feedback" << endl;
+        string pid;
+        cout << "Enter Patient ID: ";
+        cin >> pid;
+        
+        bool found_patient = false;
+        for(int i=0; i<patient_count; i++) {
+            if(patients[i].id == pid) {
+                found_patient = true;
+                Feedback fb;
+                fb.user_id = pid;
+                
+                cout << "Rate our service (1-5): ";
+                while(!(cin >> fb.rating) || fb.rating < 1 || fb.rating > 5) {
+                    cout << "Invalid! Enter 1-5: ";
+                    cin.clear();
+                    cin.ignore();
+                }
+                
+                cin.ignore();
+                cout << "Comments (optional): ";
+                getline(cin, fb.comment);
+                
+                // Get current date
+                time_t now = time(0);
+                tm* t = localtime(&now);
+
+                char buf[20];
+                strftime(buf, sizeof(buf), "%Y-%m-%d", t);
+                fb.date = buf;
+                
+                // Save to file
+                fstream file("Feedback.txt", ios::app);
+                if(file.is_open()) {
+                    if(file.tellp() == 0)
+                        file << "ID\tType\tRating\tComment\tDate\n";
+                    
+                    file << pid << "\tPatient\t" 
+                         << fb.rating << "\t"
+                         << fb.comment << "\t"
+                         << fb.date << "\n";
+                    cout << "Thank you!\n";
+                }
+                break;
+            }
+        }
+        if(!found_patient) {
+            cout << "Patient not found!\n";
+        }
         break;
-    case 2:
-        cout << "Patient Feedback on Facilities" << endl;
-        // Add feedback handling
-        break;
-    case 3:
+    }
+    
+    case 2: {
         cout << "Staff Feedback on Management" << endl;
-        // Add feedback handling
+        int sid;
+        cout << "Enter Staff ID: ";
+        cin >> sid;
+        
+        bool found_staff = false;
+        for(const auto& s : staff_list) {
+            if(s.id == sid) {
+                found_staff = true;
+                Feedback fb;
+                fb.user_id = to_string(sid);
+                
+                cout << "Rate management (1-5): ";
+                while(!(cin >> fb.rating) || fb.rating < 1 || fb.rating > 5) {
+                    cout << "Invalid! Enter 1-5: ";
+                    cin.clear();
+                    cin.ignore();
+                }
+                
+                cin.ignore();
+                cout << "Suggestions (optional): ";
+                getline(cin, fb.comment);
+                
+                // Get current date
+                time_t now = time(0);
+                tm* t = localtime(&now);
+                char buf[20];
+                strftime(buf, sizeof(buf), "%Y-%m-%d", t);
+                fb.date = buf;
+                
+                // Save to file
+                fstream file("Feedback.txt", ios::app);
+                if(file.is_open()) {
+                    if(file.tellp() == 0)
+                        file << "ID\tType\tRating\tComment\tDate\n";
+                    
+                    file << sid << "\tStaff\t" 
+                         << fb.rating << "\t"
+                         << fb.comment << "\t"
+                         << fb.date << "\n";
+                    cout << "Thank you!\n";
+                }
+                break;
+            }
+        }
+        if(!found_staff) cout << "Staff not found!\n";
         break;
-    case 4:
-        cout << "Exiting..." << endl;
-        return 0;
+    }
+    
+    case 3:
+        cout << "Exiting Feedback menu..." << endl;
+        break;
+    
     default:
         cout << "Invalid choice. Please try again." << endl;
     }
-    break;
 }
-
 case 8:
     cout << "Exiting..." << endl;
     return 0;
 
 default:
     cout << "Invalid choice. Please try again." << endl;
-}
-}
 }
